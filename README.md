@@ -48,12 +48,11 @@ path = "/videos"
 Next image will load when key 'k' is pressed, the current image is skipped
 Next image will load when key 's' is pressed, the current image and data are saved
 
-### Images will keep loading until you run out of images, or press key 'x' to terminate the program.
+## Attention
+Images will keep loading until you run out of images, or press key 'x' to terminate the program.
 
 ## TODO
 Implement functionality to read all the videos in the directory
 
 ## Disclosure
 The project has been designed with the help of chatGPT. Why do the hardwork when there are tools to help you. You just need clear understanding of what you want and how you want it. Be prepared to troubleshoot issues yourself as chatGPT made a lot of logical errors during the process which required manual intervension.
-
-##Di
