@@ -48,9 +48,9 @@ path = "/videos"
 Next image will load when key 'k' is pressed, the current image is skipped
 Next image will load when key 's' is pressed, the current image and data are saved
 
-## Images will kepp loading until you run out of images, or press key 'x' to terminate the program.
+### Images will keep loading until you run out of images, or press key 'x' to terminate the program.
 
-##TODO
+## TODO
 Implement functionality to read all the videos in the directory
 
 ## Disclosure
