@@ -4,6 +4,22 @@ Extracts frames from videos, allows an interface to draw bounding boxes and it o
 
 ### This project is desinged to help create a custom dataset for a personal project
 
+## Prerequisite
+- OpenCV   version 4.10.0.84
+- Numpy    version 1.21.6
+
+### How to install
+### Install OpenCv
+```
+pip install opencv-python==4.10.0.84
+```
+### Install Numpy
+```
+pip install numpy==1.21.6
+```
+
+if you find any issues while installation, please seek out support from relevant platforms (Documentation, StackOverflow, GPTs)
+
 ## How it works
 The tool first reads a video file and picks frames at a specified rate. It uses OpenCV library to check for blurry images, the default threshold is 100, adjust it according to your needs. It then selects images that pass the blur threshold.
 
