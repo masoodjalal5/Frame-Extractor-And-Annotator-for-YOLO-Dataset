@@ -13,19 +13,19 @@ Afterwards, the images are opened in a window for manual annotation.
 Where the user must draw a bounding box around an object manually.
 There are hotkeys to assist in the process.
 
-key 'q'     : Rotates the bounding box 15 degrees anti-clockwise
-key 'w'     : Rotates the bounding box 5 degrees anti-clockwise
-key 'e'     : Rotates the bounding box 1 degrees anti-clockwise
+key 't'     : Rotates the bounding box 15 degrees anti-clockwise
+key 'y'     : Rotates the bounding box 5 degrees anti-clockwise
+key 'u'     : Rotates the bounding box 1 degrees anti-clockwise
 
-key 'y'     : Rotates the bounding box 15 degrees clockwise
-key 't'     : Rotates the bounding box 5 degrees clockwise
-key 'r'     : Rotates the bounding box 1 degrees clockwise
+key 'p'     : Rotates the bounding box 15 degrees clockwise
+key 'o'     : Rotates the bounding box 5 degrees clockwise
+key 'i'     : Rotates the bounding box 1 degrees clockwise
 
-Key 'v'     : Increases the length of bounding box by 4 pixels
-Key 'c'     : Decreases the length of bounding box by 4 pixels
+Key 'd'     : Increases the length of bounding box by 4 pixels
+Key 'a'     : Decreases the length of bounding box by 4 pixels
 
-Key 'g'     : Increases the height of bounding box by 4 pixels
-Key 'f'     : Decreases the height of bounding box by 4 pixels
+Key 'w'     : Increases the height of bounding box by 4 pixels
+Key 's'     : Decreases the height of bounding box by 4 pixels
 
 Up Button   :   moves the bounding box up by 2 pixels
 Down Button :   moves the bounding box down by 2 pixels
@@ -33,10 +33,10 @@ Left Button :   moves the bounding box left by 2 pixels
 Right Button:   moves the bounding box right by 2 pixels
 
 Key 'k'     : Skips the frame, if deemed unnecessary or blurry on visual inspection
+Key 'j'     : Saves the frame along with annotation data
 
-Key 's'     : Saves the frame along with annotation data
-
-Key 'x'     : Terminates the program
+Key 'x'     : Terminates the current video and loads the next video frames
+Key 'z'     : Terminates the program completely
 
 The saved frames are stored in the following format
 Original Image              :   path = "/original_frames"
@@ -59,6 +59,7 @@ TODO: Implement functionality to read all the videos in the directory
 import cv2
 import numpy as np
 import os
+import sys
 
 # Set the image resolution
 frame_width = 640
@@ -78,6 +79,8 @@ bb_height_change = 0    # Height of bounding box
 
 bb_move_horiz = 0       # Move the bounding box horizontally
 bb_move_vert = 0        # Move the bounding box vertically
+
+class_id = 0            # Class ID of object
 
 
 def is_blurry(frame, threshold=100):
@@ -106,6 +109,7 @@ def draw_rectangle(event, x, y, flags, param):
             img_copy = current_frame.copy()
             draw_rotated_rectangle(img_copy, ix, iy, x, y, rotation_angle)
             display_angle(img_copy, rotation_angle)
+            display_class_id(img_copy, class_id)
             cv2.imshow('frame', img_copy)
         elif dragging:
             if selected_box_idx != -1:
@@ -121,6 +125,7 @@ def draw_rectangle(event, x, y, flags, param):
             bounding_boxes.append((ix, iy, x, y, rotation_angle))
             draw_rotated_rectangle(current_frame, ix, iy, x, y, rotation_angle)
             display_angle(current_frame, rotation_angle)
+            display_class_id(current_frame, class_id)
             cv2.imshow('frame', current_frame)
         elif dragging:
             dragging = False
@@ -167,11 +172,17 @@ def draw_rotated_rectangle(img, x1, y1, x2, y2, angle):
 def display_angle(img, angle):
     """Display the angle on top of the frame."""
     font = cv2.FONT_HERSHEY_SIMPLEX
-    text = f'Angle: {angle:.1f} degrees'
-    cv2.putText(img, text, (10, 30), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+    text = f'Angle: {angle:.1f}'
+    cv2.putText(img, text, (10, 30), font, 1, (255, 255, 255), 1, cv2.LINE_AA)
+
+def display_class_id(img, class_id):
+    """Display the angle on top of the frame."""
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    text = f'Class: {chr(class_id)}'
+    cv2.putText(img, text, (250, 30), font, 1, (255, 255, 255), 1, cv2.LINE_AA)
 
 def save_annotations(output_dir, frame_name, width, height):
-    global rotation_angle
+    global rotation_angle, class_id
     annotation_path = os.path.join(output_dir, frame_name.replace('.jpg', '.txt'))
     with open(annotation_path, 'w') as f:
         for (x1, y1, x2, y2, angle) in bounding_boxes:
@@ -180,7 +191,7 @@ def save_annotations(output_dir, frame_name, width, height):
             y_center = (y1 + y2) / 2 / height
             bbox_width = (x2 - x1) / width
             bbox_height = (y2 - y1) / height
-            f.write(f"0 {x_center} {y_center} {bbox_width} {bbox_height} {rotation_angle}\n")
+            f.write(f"{chr(class_id)} {x_center} {y_center} {bbox_width} {bbox_height} {rotation_angle}\n")
 
 def process_video(video_path, frame_interval, blur_threshold=100):
     """Read a video, select frames at constant intervals, and skip blurry frames."""
@@ -204,7 +215,8 @@ def process_video(video_path, frame_interval, blur_threshold=100):
         if not is_blurry(frame, blur_threshold):
             selected_frames.append((idx, frame))
         else:
-            print(f"Skipped blurry frame at index {idx}")
+            video_path.replace("videos/", "")
+            print(f"{video_path} : Skipped blurry frame at index {idx}")
 
     cap.release()
     return selected_frames
@@ -217,7 +229,7 @@ def resize_frame(frame):
 def redraw_frame():
     """Redraw the frame with all bounding boxes."""
     global current_frame, original_frame, bounding_boxes
-    global bb_len_change, bb_height_change, bb_move_horiz, bb_move_vert
+    global bb_len_change, bb_height_change, bb_move_horiz, bb_move_vert, class_id
     
     current_frame = original_frame.copy()
     for (x1, y1, x2, y2, angle) in bounding_boxes:
@@ -225,6 +237,7 @@ def redraw_frame():
         draw_rotated_rectangle(current_frame, x1 + (bb_move_horiz/2) - (bb_len_change/2) , y1 + (bb_move_vert/2) - (bb_height_change/2), x2 + (bb_move_horiz/2) + (bb_len_change/2), y2 + (bb_move_vert/2) + (bb_height_change/2), rotation_angle)
                     
     display_angle(current_frame, rotation_angle)
+    display_class_id(current_frame, class_id)
     cv2.imshow('frame', current_frame)
 
 def save_frames(frames, output_dir, original_frame_out_dir, label_dir, video_name):
@@ -239,6 +252,7 @@ def save_frames(frames, output_dir, original_frame_out_dir, label_dir, video_nam
     global frame_width, frame_height
     global current_frame, original_frame, bounding_boxes, rotation_angle
     global bb_len_change, bb_height_change, bb_move_horiz, bb_move_vert
+    global class_id
 
     for idx, frame in frames:
         frame_name = f"{video_name}_frame_{idx:04d}.jpg"
@@ -256,6 +270,8 @@ def save_frames(frames, output_dir, original_frame_out_dir, label_dir, video_nam
         bb_move_vert = 0    # Reset Vertical Movement
         is_move_horiz = False  # Reset Horizontal Movement
         is_move_vert = False   # Reset Vertical Movement
+        
+        class_id = 0            # Reset Class id for next frame
 
         while True:
             cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
@@ -264,8 +280,10 @@ def save_frames(frames, output_dir, original_frame_out_dir, label_dir, video_nam
             cv2.setMouseCallback('frame', draw_rectangle)
             # key = cv2.waitKey(1) & 0xFF
             key = cv2.waitKeyEx(0)
-
-            if key == ord('s'):  # Save the annotations and move to the next frame
+            
+            redraw_frame()
+            
+            if key == ord('j'):  # Save the annotations and move to the next frame
                 cv2.imwrite(output_path, current_frame)
                 cv2.imwrite(original_frame_out_path, original_frame)
                 print(f"Saved frame to {output_path}")
@@ -277,46 +295,46 @@ def save_frames(frames, output_dir, original_frame_out_dir, label_dir, video_nam
                 break	
 			
             # Rotate Clockwise
-            elif key == ord('q'):  # Rotate bounding boxes by -15 degrees
+            elif key == ord('p'):  # Rotate bounding boxes by -15 degrees
                 rotation_angle = (rotation_angle - 15) % 360
                 current_frame = resize_frame(frame)  # Reset the frame for rotation
                 redraw_frame()
-            elif key == ord('w'):  # Rotate bounding boxes by -5 degrees
+            elif key == ord('o'):  # Rotate bounding boxes by -5 degrees
                 rotation_angle = (rotation_angle - 5) % 360
                 current_frame = resize_frame(frame)  # Reset the frame for rotation
                 redraw_frame()
-            elif key == ord('e'):  # Rotate bounding boxes by -1 degrees
+            elif key == ord('i'):  # Rotate bounding boxes by -1 degrees
                 rotation_angle = (rotation_angle - 1) % 360
                 current_frame = resize_frame(frame)  # Reset the frame for rotation
                 redraw_frame()
                 
             # Rotate Anti-Clockwise
-            elif key == ord('r'):  # Rotate bounding boxes by 1 degrees
+            elif key == ord('u'):  # Rotate bounding boxes by 1 degrees
                 rotation_angle = (rotation_angle + 1) % 360
                 current_frame = resize_frame(frame)  # Reset the frame for rotation
                 redraw_frame()
-            elif key == ord('t'):  # Rotate bounding boxes by 5 degrees
+            elif key == ord('y'):  # Rotate bounding boxes by 5 degrees
                 rotation_angle = (rotation_angle + 5) % 360
                 current_frame = resize_frame(frame)  # Reset the frame for rotation
                 redraw_frame()                
-            elif key == ord('y'):  # Rotate bounding boxes by 15 degrees
+            elif key == ord('t'):  # Rotate bounding boxes by 15 degrees
                 rotation_angle = (rotation_angle + 15) % 360
                 current_frame = resize_frame(frame)  # Reset the frame for rotation                
                 redraw_frame()
             
             # Increase/Decrease length of bounding box
-            elif key == ord('v'):
+            elif key == ord('d'):
                 bb_len_change = bb_len_change + 4
                 redraw_frame()
-            elif key == ord('c'):
+            elif key == ord('a'):
                 bb_len_change = bb_len_change - 4
                 redraw_frame()
             
             # Increase/Decrease height of bounding box
-            elif key == ord('g'):
+            elif key == ord('w'):
                 bb_height_change = bb_height_change + 4
                 redraw_frame()
-            elif key == ord('f'):
+            elif key == ord('s'):
                 bb_height_change = bb_height_change - 4
                 redraw_frame()
             
@@ -336,20 +354,60 @@ def save_frames(frames, output_dir, original_frame_out_dir, label_dir, video_nam
                 bb_move_vert = bb_move_vert + 4
                 redraw_frame()
                 
+            elif ord('0') <= key <= ord('9'):
+                class_id = key
+                redraw_frame()
+                
             elif key == ord('x'):  # Quit the program
                 cv2.destroyAllWindows()
                 return
+            elif key == ord('z'):
+                sys.exit(0)
+                
         
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    video_path = "videos\\Blue Pointer 2.mp4"
+
+    # Output paths
     destination_path = "output_frames"
     label_path = "labels"
     original_frame_out_path = "original_frames"
-
-    selected_frames = process_video(video_path, frame_interval=15, blur_threshold=100)
     
-    video_name = video_path.replace("videos\\", "").replace(".mp4", "")
+    videos_list = []
+    
+    #video_path = "videos\\Blue Pointer 2.mp4"
+    video_directory = "videos/"         # Define the directory containing the videos
+    files = os.listdir(video_directory) # Get a list of all files in the directory
 
-    save_frames(selected_frames, destination_path, original_frame_out_path, label_path, video_name)
+    # Filter out non-video files (you can extend this list with other video formats if needed)
+    video_extensions = ('.mp4', '.avi', '.mov', '.mkv', '.flv')
+    video_files = [f for f in files if f.lower().endswith(video_extensions)]
+    
+    try:
+        f = open("video_completion_log.txt", "r")
+        videos_list = f.readlines()
+        videos_list = [line.strip() for line in videos_list]
+    except:
+        print("Running for the first time \n")
+    
+    # Loop through each video file and read it
+    for video_file in video_files:
+        
+        video_path = os.path.join(video_directory, video_file)
+        video_name = video_file.lower().replace(".mp4", "").replace(" ", "_").replace("-","_")
+        
+        # checks if videos_list is not empty or video name is in the list
+        # This condition is only true if the list is not empty and the name is in the list
+        # If it is true, then it means the video had been previously processed and skipped this time.        
+        if videos_list and video_name in videos_list:
+            print(f"Skipped: {video_name} \t\t Reason: video was processed previously ...")
+            continue
+
+        selected_frames = process_video(video_path, frame_interval=10, blur_threshold=100)
+        save_frames(selected_frames, destination_path, original_frame_out_path, label_path, video_name)
+        
+        f = open("video_completion_log.txt", "a")
+        f.write(video_name)
+        f.write("\n")
+        f.close()
