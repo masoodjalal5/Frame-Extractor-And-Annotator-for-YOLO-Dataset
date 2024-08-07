@@ -27,56 +27,49 @@ Afterwards, the images are opened in a window for manual annotation. Where the u
 
 ## Hot Keys
 
-key 't'     : Rotates the bounding box 15 degrees anti-clockwise
-key 'y'     : Rotates the bounding box 5 degrees anti-clockwise
-key 'u'     : Rotates the bounding box 1 degrees anti-clockwise
+- Key 't'     : Rotates the bounding box 15 degrees anti-clockwise
+- Key 'y'     : Rotates the bounding box 5 degrees anti-clockwise
+- Key 'u'     : Rotates the bounding box 1 degrees anti-clockwise
 
-key 'p'     : Rotates the bounding box 15 degrees clockwise
-key 'o'     : Rotates the bounding box 5 degrees clockwise
-key 'i'     : Rotates the bounding box 1 degrees clockwise
+- Key 'p'     : Rotates the bounding box 15 degrees clockwise
+- Key 'o'     : Rotates the bounding box 5 degrees clockwise
+- Key 'i'     : Rotates the bounding box 1 degrees clockwise
 
-Key 'd'     : Increases the length of bounding box by 4 pixels
-Key 'a'     : Decreases the length of bounding box by 4 pixels
+- Key 'd'     : Increases the length of bounding box by 4 pixels
+- Key 'a'     : Decreases the length of bounding box by 4 pixels
 
-Key 'w'     : Increases the height of bounding box by 4 pixels
-Key 's'     : Decreases the height of bounding box by 4 pixels
+- Key 'w'     : Increases the height of bounding box by 4 pixels
+- Key 's'     : Decreases the height of bounding box by 4 pixels
 
-Up Button   :   moves the bounding box up by 2 pixels
-Down Button :   moves the bounding box down by 2 pixels
-Left Button :   moves the bounding box left by 2 pixels
-Right Button:   moves the bounding box right by 2 pixels
+- Up Button   :   moves the bounding box up by 2 pixels
+- Down Button :   moves the bounding box down by 2 pixels
+- Left Button :   moves the bounding box left by 2 pixels
+- Right Button:   moves the bounding box right by 2 pixels
 
-Key 'k'     : Skips the frame, if deemed unnecessary or blurry on visual inspection
-Key 'j'     : Saves the frame along with annotation data
+- Key 'k'     : Skips the frame, if deemed unnecessary or blurry on visual inspection
+- Key 'j'     : Saves the frame along with annotation data
 
-Key 'x'     : Terminates the current video and loads the next video frames
-Key 'z'     : Terminates the program completely
+- Key 'x'     : Terminates the current video and loads the next video frames
+- Key 'z'     : Terminates the program completely
 
-The saved frames are stored in the following format
-Original Image              :   path = "/original_frames"
-Image with bounding box     :   path = "/output_frames"
-Image Annotation Labels     :   path = "/labels"
 
 The video/videos must be stored in the following folder
-path = "/videos"
+- path = "/videos"
 
-Next image will load when key 'k' is pressed, the image is skipped
-Next image will load when key 's' is pressed, the image and data are saved
+- Next image will load when key 'k' is pressed, the image is skipped
+- Next image will load when key 's' is pressed, the image and data are saved
 
-Next images will kepp loading until you run out of images, or press key 'x' 
-to terminate the program.
+- Next images will kepp loading until you run out of images, or press key 'x' to terminate the program.
 
 ## Folder Structure
 The saved frames are stored in the following format
-Original Image              :   path = "/original_frames"
-Image with bounding box     :   path = "/output_frames"
-Image Annotation Labels     :   path = "/labels"
+- Original Image              :   path = "/original_frames"
+- Image with bounding box     :   path = "/output_frames"
+- Image Annotation Labels     :   path = "/labels"
 
-The video/videos must be stored in the following folder
-path = "/videos"
+- The video/videos must be stored in the following folder
+- path = "/videos"
 
-Next image will load when key 'k' is pressed, the current image is skipped
-Next image will load when key 's' is pressed, the current image and data are saved
 
 ## Attention
 Images will keep loading until you run out of images, or press key 'x' to terminate the program.
