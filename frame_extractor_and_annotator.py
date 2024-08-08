@@ -191,9 +191,10 @@ def save_annotations(output_dir, frame_name, width, height):
             y_center = (y1 + y2) / 2 / height
             bbox_width = (x2 - x1) / width
             bbox_height = (y2 - y1) / height
-            f.write(f"{chr(class_id)} {x_center} {y_center} {bbox_width} {bbox_height} {rotation_angle}\n")
+            f.write(f"{chr(class_id)} {x_center} {y_center} {bbox_width} {bbox_height}\n")            
+            # f.write(f"{chr(class_id)} {x_center} {y_center} {bbox_width} {bbox_height} {rotation_angle}\n")
 
-def process_video(video_path, frame_interval, blur_threshold=100):
+def process_video(video_path, frame_interval, blur_threshold):
     """Read a video, select frames at constant intervals, and skip blurry frames."""
     global current_frame, bounding_boxes
     cap = cv2.VideoCapture(video_path)
@@ -255,6 +256,16 @@ def save_frames(frames, output_dir, original_frame_out_dir, label_dir, video_nam
     global class_id
 
     for idx, frame in frames:
+    
+        try:
+            f = open("last_frame.txt", "r")
+            last_frame = f.read()
+        except:
+            print("Starting from frame 0 \n")
+            
+        if idx < int(last_frame):
+            continue
+            
         frame_name = f"{video_name}_frame_{idx:04d}.jpg"
         output_path = os.path.join(output_dir, frame_name)
         original_frame_out_path = os.path.join(original_frame_out_dir, frame_name)
@@ -271,7 +282,7 @@ def save_frames(frames, output_dir, original_frame_out_dir, label_dir, video_nam
         is_move_horiz = False  # Reset Horizontal Movement
         is_move_vert = False   # Reset Vertical Movement
         
-        class_id = 0            # Reset Class id for next frame
+        # class_id = 0            # Reset Class id for next frame
 
         while True:
             cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
@@ -361,7 +372,11 @@ def save_frames(frames, output_dir, original_frame_out_dir, label_dir, video_nam
             elif key == ord('x'):  # Quit the program
                 cv2.destroyAllWindows()
                 return
-            elif key == ord('z'):
+            elif key == ord('z'): 
+                print(f"closing at frame {idx}")
+                f = open("last_frame.txt", "w")
+                f.write(str(idx))
+                f.close()
                 sys.exit(0)
                 
         
@@ -404,10 +419,16 @@ if __name__ == "__main__":
             print(f"Skipped: {video_name} \t\t Reason: video was processed previously ...")
             continue
 
-        selected_frames = process_video(video_path, frame_interval=10, blur_threshold=100)
+        selected_frames = process_video(video_path, frame_interval=5, blur_threshold=100)
         save_frames(selected_frames, destination_path, original_frame_out_path, label_path, video_name)
         
         f = open("video_completion_log.txt", "a")
         f.write(video_name)
         f.write("\n")
         f.close()
+        
+        f = open("last_frame.txt", "w")
+        f.write(str(0))
+        f.close()
+    
+    print("\n.... All Done ....\n")
