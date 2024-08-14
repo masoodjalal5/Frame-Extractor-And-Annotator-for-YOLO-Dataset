@@ -260,11 +260,10 @@ def save_frames(frames, output_dir, original_frame_out_dir, label_dir, video_nam
         try:
             f = open("last_frame.txt", "r")
             last_frame = f.read()
+            if idx < int(last_frame):
+                continue
         except:
             print("Starting from frame 0 \n")
-            
-        if idx < int(last_frame):
-            continue
             
         frame_name = f"{video_name}_frame_{idx:04d}.jpg"
         output_path = os.path.join(output_dir, frame_name)
